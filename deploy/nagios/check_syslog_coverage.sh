@@ -52,6 +52,11 @@ bad=$(printf '%s' "$wrong_driver" | wc -w)
 quiet=$(printf '%s' "$no_logs" | wc -w)
 perf="containers=$total wrong_driver=$bad;$WARN_AT;$CRIT_AT;0 no_logs=$quiet"
 
+# Only the log driver drives the alert state. "No collected logs" is reported but
+# never pages: an idle MCP server that logs solely on request is indistinguishable
+# from a broken one here, and alerting on it would page constantly for normal
+# behaviour. Collector-wide ingest failure is caught by check_syslog_freshness.sh,
+# which measures something unambiguous.
 if [ "$bad" -ge "$CRIT_AT" ]; then
     echo "CRITICAL - $bad of $total containers bypass central logging:$wrong_driver | $perf"
     exit 2
@@ -59,8 +64,8 @@ elif [ "$bad" -ge "$WARN_AT" ]; then
     echo "WARNING - $bad of $total containers bypass central logging:$wrong_driver | $perf"
     exit 1
 elif [ "$quiet" -gt 0 ]; then
-    echo "WARNING - all $total containers use journald, but $quiet have no collected logs:$no_logs | $perf"
-    exit 1
+    echo "OK - all $total containers use journald; $quiet quiet (no logs yet):$no_logs | $perf"
+    exit 0
 else
     echo "OK - all $total containers reaching the collector | $perf"
     exit 0
