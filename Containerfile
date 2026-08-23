@@ -33,6 +33,7 @@ FROM registry.access.redhat.com/ubi10/ubi-micro:latest
 
 COPY --from=build /out /
 COPY config/rsyslog.conf /etc/rsyslog.conf
+COPY scripts/healthcheck.sh /usr/bin/syslog-healthcheck
 
 # rsyslog must read /var/log/journal, which is root:systemd-journal 0640.
 # Confinement comes from SELinux (container_logreader_t) rather than the UID —

@@ -25,7 +25,21 @@ ExecStartPre=/usr/bin/mkdir -p /srv/syslog.crunchtools.com/data/logs/_collector 
 # cgroup (anon-rss 259 MB) while chewing through the initial journal backlog:
 # imjournal reading a 3.9 GB journal with a 50k-message queue behind it. Steady
 # state is ~18 MB, so this is headroom for the burst, not for the baseline.
+# The health probe is what makes an imjournal stall self-healing. imjournal
+# stops following the journal across a rotation -- rsyslogd stays up, its port
+# stays open, its queue reports empty and healthy, and nothing is ingested.
+# lotor rotates its journal every one to two hours, so this is routine.
+#
+# on-failure=kill rather than =restart: podman kills the container, the
+# foreground `podman run` exits, and systemd's Restart=always brings it back.
+# That keeps systemd the single owner of the lifecycle. The restart is lossless
+# -- imjournal replays from its state-file cursor.
 ExecStart=/usr/bin/podman run \
+    --health-cmd /usr/bin/syslog-healthcheck \
+    --health-interval 2m \
+    --health-retries 2 \
+    --health-start-period 90s \
+    --health-on-failure kill \
     --label io.containers.autoupdate=registry \
     --label PODMAN_SYSTEMD_UNIT=syslog.crunchtools.com.service \
     --memory=512m --memory-swap=512m \
