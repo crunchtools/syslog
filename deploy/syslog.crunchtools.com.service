@@ -1,0 +1,38 @@
+[Unit]
+Description=Podman container - syslog.crunchtools.com (Central Log Collector)
+Documentation=https://github.com/crunchtools/syslog
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+ExecStartPre=/usr/bin/sleep 1.5
+ExecStartPre=-/usr/bin/podman rm -f syslog.crunchtools.com
+# impstats writes straight to log.file and will not create its parent, and the
+# bind mount hides whatever the image shipped at /logs.
+ExecStartPre=/usr/bin/mkdir -p /srv/syslog.crunchtools.com/data/logs/_collector /srv/syslog.crunchtools.com/data/state
+ExecStart=/usr/bin/podman run \
+    --label io.containers.autoupdate=registry \
+    --label PODMAN_SYSTEMD_UNIT=syslog.crunchtools.com.service \
+    --memory=256m --memory-swap=256m \
+    --rm \
+    --name syslog.crunchtools.com \
+    --hostname syslog.crunchtools.com \
+    --network crunchtools \
+    --network-alias syslog \
+    -p 127.0.0.1:514:514/udp \
+    -p 127.0.0.1:514:514/tcp \
+    --security-opt label=type:container_logreader_t \
+    -v /srv/syslog.crunchtools.com/config/rsyslog.conf:/etc/rsyslog.conf:ro,Z \
+    -v /srv/syslog.crunchtools.com/data/logs:/logs:Z \
+    -v /srv/syslog.crunchtools.com/data/state:/var/lib/rsyslog:Z \
+    -v /var/log/journal:/var/log/journal:ro \
+    -v /etc/machine-id:/etc/machine-id:ro \
+    quay.io/crunchtools/syslog:latest
+ExecStop=/usr/bin/podman stop -t 10 syslog.crunchtools.com
+ExecStopPost=/usr/bin/podman rm -f syslog.crunchtools.com
+
+[Install]
+WantedBy=multi-user.target

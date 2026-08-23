@@ -1,0 +1,17 @@
+[Unit]
+Description=Compress and expire collected syslog files
+Documentation=https://github.com/crunchtools/syslog
+
+[Service]
+Type=oneshot
+Environment=SYSLOG_LOG_ROOT=/srv/syslog.crunchtools.com/data/logs
+Environment=SYSLOG_COMPRESS_AFTER_DAYS=2
+Environment=SYSLOG_DELETE_AFTER_DAYS=90
+# lotor runs bootc image mode, so /usr is read-only — host-side helper scripts
+# live under /srv, the same as the nagios-agent check scripts.
+#
+# Invoked through bash rather than directly: files under /srv are labelled var_t,
+# which systemd may not exec. Passing the script as an argument means only read
+# access is needed, so this works whatever the label is — no chcon in the deploy
+# path, and nothing to break on the next relabel.
+ExecStart=/usr/bin/bash /srv/syslog.crunchtools.com/bin/prune-logs.sh

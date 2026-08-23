@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily compression and expiry of collected syslog files
+Documentation=https://github.com/crunchtools/syslog
+
+[Timer]
+OnCalendar=*-*-* 03:20:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
