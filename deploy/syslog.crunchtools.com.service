@@ -21,10 +21,14 @@ ExecStartPre=-/usr/bin/podman rm -f syslog.crunchtools.com
 # impstats writes straight to log.file and will not create its parent, and the
 # bind mount hides whatever the image shipped at /logs.
 ExecStartPre=/usr/bin/mkdir -p /srv/syslog.crunchtools.com/data/logs/_collector /srv/syslog.crunchtools.com/data/state
+# --memory=512m, not 256m. At 256m the collector was OOM-killed inside its own
+# cgroup (anon-rss 259 MB) while chewing through the initial journal backlog:
+# imjournal reading a 3.9 GB journal with a 50k-message queue behind it. Steady
+# state is ~18 MB, so this is headroom for the burst, not for the baseline.
 ExecStart=/usr/bin/podman run \
     --label io.containers.autoupdate=registry \
     --label PODMAN_SYSTEMD_UNIT=syslog.crunchtools.com.service \
-    --memory=256m --memory-swap=256m \
+    --memory=512m --memory-swap=512m \
     --rm \
     --name syslog.crunchtools.com \
     --hostname syslog.crunchtools.com \
