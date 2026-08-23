@@ -4,6 +4,14 @@ Documentation=https://github.com/crunchtools/syslog
 Wants=network-online.target
 After=network-online.target
 
+# Senders reach the collector by three different routes, because the fleet is
+# spread across three network types:
+#   crunchtools network  -> the `syslog` network alias
+#   podman network       -> 10.88.0.1:514 (the bridge gateway)
+#   host network         -> 127.0.0.1:514
+# The host's nftables policy already allows 10.88.0.0/16 and drops 514 from
+# anywhere off-box.
+
 [Service]
 Type=simple
 Restart=always
@@ -24,6 +32,8 @@ ExecStart=/usr/bin/podman run \
     --network-alias syslog \
     -p 127.0.0.1:514:514/udp \
     -p 127.0.0.1:514:514/tcp \
+    -p 10.88.0.1:514:514/udp \
+    -p 10.88.0.1:514:514/tcp \
     --security-opt label=type:container_logreader_t \
     -v /srv/syslog.crunchtools.com/config/rsyslog.conf:/etc/rsyslog.conf:ro,Z \
     -v /srv/syslog.crunchtools.com/data/logs:/logs:Z \

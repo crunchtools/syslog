@@ -82,11 +82,18 @@ relabelling the host journal would break journald itself.
 `/logs/<source>/<YYYY-MM-DD>.log`, plain text, one line per message:
 
 ```
-<rfc3339 timestamp> <host> <source> <SEVERITY> <message>
+<rfc3339 timestamp> <host> <source> <program> <SEVERITY> <message>
 ```
 
+`<source>` resolves per ingest path: `CONTAINER_NAME` for journal messages, the
+sender hostname for network-forwarded ones, and the program name for host
+services. Network messages MUST key on hostname rather than program name —
+otherwise `httpd` from every systemd web container collapses into one directory
+and service attribution is lost. `<program>` is kept as its own field so that
+distinction survives inside a multi-service container.
+
 Plain text rather than JSON so it stays greppable with ordinary tools while the
-fixed five-field prefix remains a single regex for the MCP server. Files are
+fixed six-field prefix remains a single regex for the MCP server. Files are
 bucketed by receipt time, not sender-claimed time, so a sender with a broken
 clock cannot create directories of 1970 files.
 

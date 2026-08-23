@@ -44,15 +44,26 @@ reach the journal, plus any future host that is not lotor.
 ```
 
 ```
-2026-08-23T15:16:44.380222+00:00 lotor.dc3.crunchtools.com mcp-memory INFO INFO:httpx:HTTP Request: POST https://... "HTTP/1.1 200 OK"
-└─ rfc3339 timestamp ──────────┘ └─ host ──────────────┘ └ source ─┘ └sev┘ └─ message ─────────────────────────────────────────────┘
+2026-08-23T15:16:44.380222+00:00 lotor.dc3.crunchtools.com mcp-memory mcp-memory INFO INFO:httpx:HTTP Request: POST ...
+└─ rfc3339 timestamp ──────────┘ └─ host ──────────────┘ └ source ─┘ └program┘ └sev┘ └─ message ────────────────────┘
 ```
 
-`<source>` is the container name where one exists, otherwise the program name —
-so host services (`sshd`, `systemd`, `podman`) land here too.
+`<source>` is the log stream, resolved per ingest path:
+
+| Ingest path | `<source>` | Example |
+|---|---|---|
+| Container via host journal | `CONTAINER_NAME` from conmon | `mcp-memory` |
+| systemd container via network 514 | sender hostname (= container name) | `crunchtools.com` |
+| Host service via journal | program name | `sshd`, `kernel` |
+
+`<program>` is carried separately because the two diverge exactly where it
+matters: a systemd container files everything under its service name, but the
+message might be from `httpd`, `php-fpm` or `mariadb` inside it. Keying network
+messages on the program name instead would pile `httpd` from every web container
+into one directory and lose all service attribution.
 
 Plain text, not JSON: it stays greppable with ordinary tools, and the fixed
-five-field prefix is a single regex for the MCP server to parse. Embedded
+six-field prefix is a single regex for the MCP server to parse. Embedded
 newlines are escaped as `#012`, so one record is always one line.
 
 ## Deploying
