@@ -18,7 +18,12 @@ if [ ! -d "$LOG_ROOT" ]; then
     exit 2
 fi
 
-newest=$(find "$LOG_ROOT" -type f -name '*.log' -printf '%T@ %p\n' 2>/dev/null \
+# -path prune on _collector is load-bearing. That directory holds the collector's
+# OWN impstats output, which it writes on a timer regardless of whether journal
+# ingest is working. Counting it here would keep this check permanently green
+# during exactly the outage it exists to detect.
+newest=$(find "$LOG_ROOT" -path "$LOG_ROOT/_collector" -prune -o \
+              -type f -name '*.log' -printf '%T@ %p\n' 2>/dev/null \
          | sort -rn | head -1)
 
 if [ -z "$newest" ]; then
