@@ -3,8 +3,23 @@
 > **Version:** 1.0.0
 > **Ratified:** 2026-08-23
 > **Status:** Active
-> **Inherits:** [crunchtools/constitution](https://github.com/crunchtools/constitution) v1.x
+> **Inherits:** [crunchtools/constitution](https://github.com/crunchtools/constitution) v1.0.0
 > **Profile:** Container Image
+
+## License
+
+AGPL-3.0-or-later.
+
+## Versioning
+
+Semantic Versioning 2.0.0. The image version tracks this repo's build recipe and
+module list, not the upstream rsyslog release. A rebuild that only picks up a
+newer UBI `rsyslog` RPM is a PATCH; adding or dropping an rsyslog module is a
+MINOR, because the module list is part of the image's contract.
+
+## Registry
+
+Published to `quay.io/crunchtools/syslog`.
 
 ## Image Purpose
 
@@ -112,10 +127,30 @@ every log on the box goes missing; `check_syslog_freshness.sh` is the only check
 that catches it. Disk usage is also monitored, because centralising 40+
 containers onto one filesystem makes `/var` shared fate.
 
+## Containerfile Conventions
+
+Single `Containerfile` at the repo root, two stages (see Build Model). The
+builder stage installs into an installroot with `microdnf`, followed by
+`microdnf clean all`; the final stage copies only the assembled rootfs, so no
+package manager reaches the shipped image. OCI `LABEL` metadata declares the
+maintainer, description, source repo and license.
+
 ## Testing
 
+`tests/test-image.sh` runs in CI on every push and pull request, against an image
+built from the current tree, before anything is pushed to Quay.
+
+- Build test: both stages must build from the `Containerfile` with no cached
+  layers, and `scripts/assemble-rootfs.sh` must hold the two invariants above
 - Static: binary, config, module and dlopen-library presence; base symlinks
   intact; no package manager present; entrypoint correct
-- Runtime: `rsyslogd -v` resolves every dynamic library (the gate that catches
-  base/RPM ABI drift); a syslog message sent over TCP lands on disk with a
-  non-blank body
+- Smoke test (runtime): `rsyslogd -v` resolves every dynamic library (the gate
+  that catches base/RPM ABI drift); a syslog message sent over TCP lands on disk
+  with a non-blank body
+- Security scan: Trivy runs against the built image in the same workflow
+
+## Quality Gates
+
+A push to `quay.io/crunchtools/syslog` happens only after the build, static,
+smoke and Trivy scan steps all pass. A failing step fails the workflow and blocks
+the push.
