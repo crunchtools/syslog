@@ -54,10 +54,10 @@ ExecStart=/usr/bin/podman run \
     -p 10.88.0.1:514:514/tcp \
     --security-opt label=type:container_logreader_t \
     -v /srv/syslog.crunchtools.com/config/rsyslog.conf:/etc/rsyslog.conf:ro,Z \
-    -v /srv/syslog.crunchtools.com/data/logs:/logs:Z \
+    -v /srv/syslog.crunchtools.com/data/logs:/logs:z \
     -v /srv/syslog.crunchtools.com/data/state:/var/lib/rsyslog:Z \
-    -v /var/log/journal:/var/log/journal:ro \
     -v /etc/machine-id:/etc/machine-id:ro \
+    -e TZ=UTC \
     quay.io/crunchtools/syslog:latest
 ExecStop=/usr/bin/podman stop -t 10 syslog.crunchtools.com
 ExecStopPost=/usr/bin/podman rm -f syslog.crunchtools.com
