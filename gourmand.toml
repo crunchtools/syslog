@@ -1,10 +1,5 @@
 # Gourmand Configuration
 # AI slop detection for maintaining code quality
 # See https://gitlab.com/mattdm/gourmand for documentation
-
-[global]
-excluded_paths = [
-    ".git/**",
-    ".github/**",
-    ".gourmand-cache/**",
-]
+# Exclusions do not go here: Gourmand ignores [global] excluded_paths in this
+# file. It already skips .gitignore'd paths; put any others in the exceptions config.
