@@ -97,15 +97,15 @@ Two runtime details that are not optional:
 # Nagios server
 install -m 0644 deploy/nagios/syslog.cfg /srv/nagios.crunchtools.com/config/services/
 # add ctr-syslog.crunchtools.com to the `infrastructure` hostgroup in container-hosts.cfg
-
-# Nagios agent
-install -m 0755 deploy/nagios/check_syslog_freshness.sh \
-                deploy/nagios/check_syslog_disk.sh \
-                /srv/nagios-agent.crunchtools.com/config/scripts/
-cat deploy/nagios/nrpe-commands.cfg >> /srv/nagios-agent.crunchtools.com/config/nrpe.cfg
 ```
 
-Both config directories are bind-mounted `:ro,Z`, so a newly installed file lands
+The NRPE side lives in
+[crunchtools/nagios-agent](https://github.com/crunchtools/nagios-agent): the
+`check_syslog_freshness`, `check_syslog_disk` and `check_syslog_coverage`
+plugins ship in its image, and their `command[]` entries are in its
+`nrpe-host.cfg` and `nrpe-ctr.cfg`.
+
+The services directory is bind-mounted `:ro,Z`, so a newly installed file lands
 as `var_t` and Nagios cannot read it. Match the label of the files already there:
 
 ```bash
