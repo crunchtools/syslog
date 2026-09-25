@@ -1,0 +1,14 @@
+# Gourmand Exceptions
+# Documented exceptions for files that legitimately trigger checks
+
+[[exceptions]]
+check = "CH009-random_scripts"
+path = "deploy/prune-logs.sh"
+justification = "Retention job, not a loose helper. README installs it under the service bin directory and syslog-prune.service (driven by syslog-prune.timer) executes it from there; it lives in deploy/ beside the units that run it."
+classification = "by_design"
+
+[[exceptions]]
+check = "CH001-absolute_paths"
+path = "deploy/nagios/syslog.cfg"
+justification = "The /srv path is inside a Nagios service `notes` string telling the on-call human which host directory the disk check measures. It is the documented lotor log root, not a path the code resolves."
+classification = "by_design"
