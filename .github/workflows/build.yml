@@ -31,7 +31,7 @@ jobs:
 
       # rsyslog ships in the UBI 10 AppStream repo, so no RHSM secrets are needed.
       - name: Build image for testing
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: Containerfile
@@ -80,7 +80,7 @@ jobs:
 
       - name: Build and push
         if: github.event_name != 'pull_request'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: Containerfile
@@ -124,7 +124,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push container image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: Containerfile
