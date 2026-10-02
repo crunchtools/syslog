@@ -8,6 +8,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- Constitution is now a v1.18.0 manifest: it holds only what is specific to
+  this repo; fleet and profile rules apply by reference.
+- Constitution validation is pinned to the inherited release via
+  `.github/workflows/constitution.yml`.
+- Dependabot auto-merges GitHub Actions minor and patch updates.
 - Gourmand CI gate and pre-commit hook (RT #1509). The stale NRPE plugin and
   command copies under `deploy/nagios/` are removed; crunchtools/nagios-agent
   ships and wires them. Constitution now inherits v1.17.0.
