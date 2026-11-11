@@ -1,0 +1,29 @@
+name: Container
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  container:
+    uses: crunchtools/constitution/.github/workflows/container-release.yml@v1.39.1
+    permissions:
+      contents: read
+      pull-requests: read
+    with:
+      image: quay.io/crunchtools/syslog
+      # rsyslog ships in the UBI 10 AppStream repo: no RHSM secrets needed.
+      # The existing suite (static filesystem checks, rsyslogd -v, and a
+      # network-syslog-in, file-on-disk round trip) runs against the pushed digest.
+      boot: command
+      boot-command: CONTAINER_RUNTIME=podman bash tests/test-image.sh --all "$IMAGE"
+    secrets:
+      QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+      QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}

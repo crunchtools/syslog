@@ -5,7 +5,7 @@
 
 set -uo pipefail
 
-RUNTIME="${CONTAINER_RUNTIME:-docker}"
+RUNTIME="${CONTAINER_RUNTIME:-podman}"
 PASS=0
 FAIL=0
 
