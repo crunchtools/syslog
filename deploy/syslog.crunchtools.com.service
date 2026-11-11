@@ -58,7 +58,7 @@ ExecStart=/usr/bin/podman run \
     -v /srv/syslog.crunchtools.com/data/state:/var/lib/rsyslog:Z \
     -v /etc/machine-id:/etc/machine-id:ro \
     -e TZ=UTC \
-    quay.io/crunchtools/syslog:latest
+    quay.io/crunchtools/syslog:main
 ExecStop=/usr/bin/podman stop -t 10 syslog.crunchtools.com
 ExecStopPost=/usr/bin/podman rm -f syslog.crunchtools.com
 
