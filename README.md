@@ -140,12 +140,12 @@ after 2 days and expires after 90. Tune via `Environment=` in
 ## Building
 
 ```bash
-podman build -t quay.io/crunchtools/syslog:latest .
-./tests/test-image.sh --static  quay.io/crunchtools/syslog:latest
-./tests/test-image.sh --runtime quay.io/crunchtools/syslog:latest
+podman build -t localhost/syslog:gate .
+./tests/test-image.sh --static  localhost/syslog:gate
+./tests/test-image.sh --runtime localhost/syslog:gate
 ```
 
-`CONTAINER_RUNTIME=podman` if you are not on the CI's docker.
+`CONTAINER_RUNTIME=docker` if you do not have podman.
 
 ## Why not Hummingbird
 
