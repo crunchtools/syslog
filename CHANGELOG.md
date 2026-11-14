@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Overlay hosts can ship logs here** (RT#1628). The collector also
+  publishes 514/tcp on gloval's WireGuard address, `10.44.0.1`, so hosts on the
+  Crunchtools overlay forward to it; the first is Exedore. Gloval's firewall
+  already accepts the overlay, and each host's messages land under its own FQDN
+  directory. Deployed and verified with a probe from Exedore. Unit file only.
+
 ## [1.0.1] - 2026-11-11
 
 ### Changed
