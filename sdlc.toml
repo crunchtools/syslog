@@ -1,2 +1,8 @@
 [tool.sdlc]
 repo-kinds = ["container-image"]
+
+[tool.sdlc.image]
+# Written by crunchtools/sdlc's scripts/convert_repo.py: moved from the workflows.
+image = "quay.io/crunchtools/syslog"
+boot = "command"
+boot-command = "CONTAINER_RUNTIME=podman bash tests/test-image.sh --all \"$IMAGE\""
