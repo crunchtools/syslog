@@ -1,2 +1,25 @@
 [tool.sdlc]
 repo-kinds = ["container-image"]
+
+[tool.sdlc.ci]
+checks = ["syslog-image", "boot-gate"]
+
+[tool.sdlc.ci.syslog-image]
+kind = "image-build"
+
+# The boot gate: tests/test-image.sh's assertions, run inside the image this PR
+# builds (tests/image-gate.sh). sdlc 0.15 does not enforce
+# `[tool.sdlc.image] boot = "command"` (crunchtools/sdlc#118). ubi-micro has bash
+# but no grep, so the script matches in bash.
+[tool.sdlc.ci.boot-gate]
+kind = "command"
+image = "localhost/syslog:sdlc"
+argv = ["/usr/bin/bash", "tests/image-gate.sh"]
+
+[tool.sdlc.image]
+image = "quay.io/crunchtools/syslog"
+# No enforced profile fits: rsyslogd takes no HTTP/MCP port, the image has no
+# HEALTHCHECK and no systemd. The boot gate is the [tool.sdlc.ci] boot-gate
+# check against this PR's built image.
+boot = "none"
+boot-none-reason = "rsyslogd is a syslog daemon: no MCP/HTTP endpoint, no HEALTHCHECK, no systemd; the boot gate is the [tool.sdlc.ci] boot-gate check (tests/image-gate.sh) against this PR's built image"
